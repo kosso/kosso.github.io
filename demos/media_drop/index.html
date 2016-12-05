@@ -169,13 +169,19 @@
             	el_fduration.innerHTML = '-';
             	el_drop.appendChild(el_media);
             	el_media.addEventListener('load', function(e){
-					console.log('image loaded: ', e);
-					console.log(el_media.naturalWidth);
+					// console.log('image loaded: ', e);
 					el_fduration.innerHTML = el_media.naturalWidth + ' x ' + el_media.naturalHeight;
 					stat('image loaded');
 					el_drop.removeChild(busy_cont);
 
-					// Image ready ...
+
+				    objectUrlToBlob(file_blob, function(blob){
+                    	file_blob_data = blob;
+	                    console.log(file_blob_data);
+
+					    // Image file ready  (file_blob / file_blob_data)
+        
+                    });				
 				});
 
             } else if(f_type === 'video/mp4'){
@@ -240,7 +246,15 @@
 				   	el_drop.appendChild(el_time);
 				    //el_media.play();
 
-				    // Video file ready 
+				    objectUrlToBlob(file_blob, function(blob){
+                    	file_blob_data = blob;
+	                    console.log(file_blob_data);
+
+					    // Video file ready  (file_blob / file_blob_data)
+
+	                    
+                    });
+
 
 				};
 
@@ -286,7 +300,7 @@
 
 								drawWaveform( audio_buffer, wave_col, wave_width, wave_height );
 
-								// Audio file ready... 
+								// Audio file ready... (file_blob or file_blob_data)
 
 						    });
 	                    });
@@ -338,9 +352,9 @@
     		var wave_ = URL.createObjectURL(blob);
     		_thumb.src = wave_;
     		el_drop.appendChild(_thumb);
-    		//blbb = null;    		
+    		// blob = null;    		
     		log('waveform rendered: <a href="'+wave_+'" target="_blank">view</a> - <a download="wave_2_'+f_name.split( f_name.split('.')[1] ).join('png')+'" href="'+wave_+'" target="_blank">save</a>');
-    		//URL.revokeObjectURL(blob)
+    		// URL.revokeObjectURL(blob)
     		canvas_wave = null;
     		wave_ctx = null;
     		buffer = null;
@@ -357,21 +371,9 @@
 		var ctx = canvas.getContext('2d');
 		canvas.width = f_width;
 		canvas.height = f_height;
-
 		ctx.drawImage(el_media, 0, 0);
-		// for one
-		//if(el_thumb!==null){
-    	//	el_drop.removeChild( el_thumb );
-		//	el_thumb = null;
-		//}
 
 		canvas.toBlob(function(blb){
-			// console.log('rendered image blob: ', blb);
-    		// many
-    		// var _thumb = document.createElement('img');
-    		// _thumb.className = 'thumb';
-    		// _thumb.src = URL.createObjectURL(blb);
-    		// el_drop.appendChild(_thumb);
     		if(el_thumb===null){
     			el_thumb = document.createElement('img');
 	    		el_thumb.className = 'thumb';
@@ -392,35 +394,26 @@
 		xhr.onload = function(e) {
 		  if (this.status == 200) {
 		  	callback(this.response);
-		    //return this.response;
 		  }
 		};
 		xhr.send();
 	}
 
 	function blobToArrayBuffer(blob, callback) {
-        //var my = this;
         console.log('blobToArrayBuffer: ', blob);
-        // Create file reader
         var reader = new FileReader();
         reader.addEventListener('progress', function (e) {
-            //my.onProgress(e);
             console.log('blobToArrayBuffer progress : ', e);
         });
         reader.addEventListener('load', function (e) {
-            //my.empty();
-            //my.loadArrayBuffer(e.target.result);
             console.log('blobToArrayBuffer loaded : ', e);
             callback(e.target.result);
-
         });
         reader.addEventListener('error', function (e) {
-            //my.fireEvent('error', 'Error reading file');
             console.log('blobToArrayBuffer error', e);
         });
         reader.readAsArrayBuffer(blob);
     }
-
 
 	// Canvas.toBlob() polyfill : https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob#Polyfill
 	if (!HTMLCanvasElement.prototype.toBlob) {
