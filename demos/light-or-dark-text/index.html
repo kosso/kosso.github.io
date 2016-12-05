@@ -1,0 +1,60 @@
+<html>
+<head>
+	<title>Random Background and Foreground colours</title>
+
+	<script type="text/javascript">
+
+
+		function randomColor(){
+		  return '#'+(function lol(m,s,c){return s[m.floor(m.random() * s.length)] + (c && lol(m,s,c-1));})(Math,'0123456789ABCDEF',4);
+		}
+
+		function isDark(_color,threshold){
+			var c = _color.substring(1);	// strip #
+			var rgb = parseInt(c, 16);		// convert rrggbb to decimal
+			var r = (rgb >> 16) & 0xff; 	// extract red
+			var g = (rgb >>  8) & 0xff;		// extract green
+			var b = (rgb >>  0) & 0xff;		// extract blue
+
+			var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+			var factor = threshold || 128;
+			return luma < factor;
+		};
+
+		function createBGFGColors(){
+			
+			var _b = randomColor();
+			var _f = '#000000';
+			if(isDark(_b)){
+				_f = '#FFFFFF';
+			}
+			return {foreground:_f, background:_b};
+		}
+
+		function init(){
+
+			var fg = createBGFGColors();
+
+			document.body.style.color = fg.foreground;
+			document.body.style.backgroundColor = fg.background;
+
+		}
+
+	</script>
+
+</head>
+<body onload="init()">
+
+<h1>Keep Reloading the Page For Random Colours</h1>
+
+<p>
+
+	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nibh felis, sodales ut nisl vel, porttitor venenatis odio. Duis sit amet sapien vestibulum, aliquam neque in, pharetra odio. Nullam elit sem, consequat in eros eu, iaculis auctor elit. In sed luctus lectus. Aliquam feugiat dolor quis lorem blandit fermentum. Proin blandit lorem eget enim bibendum convallis. Praesent lorem erat, tristique a eros in, tincidunt sodales felis. Donec luctus ut leo in volutpat. Sed euismod diam quis nisi viverra, finibus imperdiet mauris imperdiet. Pellentesque eu convallis sapien. Sed justo ipsum, porta eget mollis eu, pulvinar vel turpis. Sed fringilla ornare enim eu porta.
+
+</p>
+
+
+</body>
+</html>
+
+
