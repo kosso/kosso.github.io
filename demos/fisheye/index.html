@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>test</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<style>
+			body {
+				color: #ccc;
+				font-size:13px;
+				text-align:center;
+				font-family: sans-serif;
+				background-color: #111111;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				text-align: left;
+				top: 0px; width: 100%;
+				padding: 15px;
+			}
+
+			a {
+
+				color: #0080ff;
+			}
+
+			input{
+				margin:5px; 
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="info">
+
+				<!-- <input type="checkbox" onchange="toggleInside(this)" name="group1" id="r1" value="1" /><label for="r1"> inside / outside sphere</label> -->
+				<br>
+				<input type="checkbox" onchange="toggleFlipImage(this)" name="group2" id="r2" value="1" /><label for="r2"> flip image </label>
+				<br>
+				<input type="checkbox" onchange="toggleAutorotate(this)" name="group3" id="r3" value="1" /><label for="r3"> auto-rotate </label>
+
+
+
+		</div>
+
+		<div id="container"></div>
+
+		<script src="js/three.min.js"></script>
+		<script src="js/DeviceOrientationController.js"></script>
+		<script src="js/GeometryUtils.js"></script>
+		<script src="js/StereoEffect.js"></script>
+		<script src="js/FontUtils.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/Detector.js"></script>
+
+
+		<script>
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var img_url = '220sphere_half.jpg'; 
+
+			var container;
+			var camera, scene, renderer;
+			var group;
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var FISHEYE_FOV = 180; // the angle of the segment of the sphere
+
+			var auto_rotate = false;
+			var inside = false;
+			var flipped = false;
+			var fish_mesh;
+
+			// 'throw' dampening
+			var targetRotation = 0;
+			var targetRotationOnMouseDown = 0;
+			var mouseX = 0;
+			var mouseXOnMouseDown = 0;
+			
+
+			init();
+			animate();
+
+			function toggleAutorotate(e){
+				if(auto_rotate){
+					targetRotation = group.rotation.y;
+				}
+				auto_rotate = !auto_rotate;
+			}
+
+
+			function toggleInside(){
+				camera.position.z = inside ? 500 : 0;
+				inside = !inside;
+			}
+
+			function toggleFlipImage(){
+				fish_mesh.scale.x = flipped ? -1 : 1;
+				flipped = !flipped;
+			}
+
+
+
+
+			var textG;
+			function createText(_text, _size, cb) {
+
+				var loader = new THREE.FontLoader(), font;
+
+			    loader.load('/demos/fisheye/fonts/helvetiker_regular.typeface.json', function(response){
+			        font = response;
+			        textG = new THREE.TextGeometry(_text, {
+			            font: font,
+			            size: _size,
+			            height: 10
+			        });
+
+					var textMeshMaterial = new THREE.MeshLambertMaterial( { color: 0xFFFFFF } );
+					var textMesh = new THREE.Mesh(textG, textMeshMaterial);
+
+			        cb(textMesh);
+			    });
+
+
+
+			}
+
+			function init() {
+
+				container = document.getElementById( 'container' );
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 2000 );
+				//camera.position.z = 500;
+
+				scene = new THREE.Scene();
+
+				group = new THREE.Group();
+				scene.add( group );
+
+
+				var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
+				dirLight.position.set( 0, 0, 1 ).normalize();
+				scene.add( dirLight );
+				var pointLight = new THREE.PointLight( 0xffffff, 1.5 );
+				pointLight.position.set( 0, 100, 90 );
+				scene.add( pointLight );
+
+				var loader = new THREE.TextureLoader();
+				loader.load( img_url, function ( texture ) {
+
+
+					var dome_geom = new THREE.SphereGeometry( 400,100,100, 0, FISHEYE_FOV * (Math.PI / 180), 0, Math.PI);
+
+					var fisheye_material = new THREE.MeshBasicMaterial( { map: texture} );
+
+					fisheye_material.side = THREE.DoubleSide;
+
+					fish_mesh = new THREE.Mesh( dome_geom, fisheye_material );
+					fish_mesh.scale.x = -1;
+
+					group.add( fish_mesh );
+
+
+					/*
+					var meshMaterial = new THREE.MeshLambertMaterial( { color: 0xCC0000 } );
+					var text = new THREE.TextGeometry( "TEST", { size: 60, height: 50, curveSegments: 6, font: "helvetiker", weight: "normal", style: "normal" });
+					var textMesh = new THREE.Mesh(text,meshMaterial);
+
+					textMesh.position.z = 100;
+					group.add(textMesh);          
+	
+
+					//loadFont(_font);
+					
+					*/
+					
+					createText('THE FLY ON THE WALL', 40, function(m){
+						m.position.z = -600;
+						m.position.x = -292;
+						m.position.y = 0;
+						group.add(m); 
+
+					});
+					createText('ONLY NEEDS 180', 53, function(m){
+						m.position.z = -600;
+						m.position.x = -292;
+						m.position.y = -55;
+						group.add(m); 
+
+					});
+
+
+
+				} );
+
+				
+
+				//renderer = new THREE.CanvasRenderer();
+				renderer = new THREE.WebGLRenderer({alpha: true, antialias: false});
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setClearColor( 0xffffff, 0 );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.target.set( 1, 0, 10 );
+				controls.update();
+
+
+				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+				//document.addEventListener( 'keypress', onDocumentKeyPress, false );
+				//document.addEventListener( 'keydown', onDocumentKeyDown, false );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+
+
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentMouseDown( event ) {
+
+				event.preventDefault();
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.addEventListener( 'mouseout', onDocumentMouseOut, false );
+
+				mouseXOnMouseDown = event.clientX - windowHalfX;
+				targetRotationOnMouseDown = targetRotation;
+
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				mouseX = event.clientX - windowHalfX;
+
+				targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
+
+			}
+
+			function onDocumentMouseUp( event ) {
+
+				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+
+			}
+
+			function onDocumentMouseOut( event ) {
+
+				document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+				document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseXOnMouseDown = event.touches[ 0 ].pageX - windowHalfX;
+					targetRotationOnMouseDown = targetRotation;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.05;
+
+				}
+
+			}
+			/*
+			function onDocumentMouseMove( event ) {
+				mouseX = ( event.clientX - windowHalfX );
+				mouseY = ( event.clientY - windowHalfY );
+			}
+			*/
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				
+			}
+
+			function render() {
+
+				// camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+				//camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+				
+				// camera.lookAt( scene.position );
+				if(auto_rotate){
+					 group.rotation.y += 0.005;
+				} else {
+					// dampened throw around
+					group.rotation.y += ( targetRotation - group.rotation.y ) * 0.08;
+				}
+
+
+				renderer.render( scene, camera );
+
+			}
+
+
+
+
+		</script>
+
+	</body>
+</html>
