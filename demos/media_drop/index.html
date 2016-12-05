@@ -32,7 +32,7 @@
 
 
 
-	var el_drop, el_media, el_status, el_fname, el_ftype, el_fsize, el_fduration, el_time, el_time_val, el_media_width, el_media_height, el_thumb, el_wave, f_type, f_name, f_width, f_height, f_size, f_duration, f_duration_fmt, file_blob, audioCtx, logs, busy, busy_cont, time_now = 0;
+	var el_drop, el_media, el_status, el_fname, el_ftype, el_fsize, el_fduration, el_time, el_time_val, el_media_width, el_media_height, el_thumb, el_wave, f_type, f_name, f_width, f_height, f_size, f_duration, f_duration_fmt, file_blob, audioCtx, logs, btn_clear_logs,  busy, busy_cont, time_now = 0;
 
     function init(){
 
@@ -46,7 +46,7 @@
         }
 
         logs = document.getElementById('logs');
-
+        btn_clear_logs = document.getElementById('clear');
     	el_status = document.getElementById('status');
     	el_drop = document.getElementById('droptarget');        	
     	el_fname = document.getElementById('f_name');
@@ -63,6 +63,12 @@
 		},false);
 
         console.log('ready');
+
+
+		btn_clear_logs.addEventListener('click',function(e){
+		  logs.innerHTML = '<h6 style="margin:0">OUTPUT LOGS:</h6>';
+		});
+
 
     }	
 
@@ -677,6 +683,20 @@
     	right:10px;
     }
 
+    button#clear{
+    	background: #660000;
+    	color: white;
+    	width: 22px;
+    	height: 22px;
+    	border-radius: 11px;
+    	font-size: 11px;
+    	line-height: 6px;
+    	text-align: center;
+    	padding: 0px;
+    	margin-left: 4px;
+    	outline: none;
+    }
+
 </style>
 
 </head>
@@ -700,6 +720,7 @@
 	<div class="op" id="logs">
 		<h6 style="margin:0">OUTPUT LOGS:</h6>
 	</div>
+	<div id="clear-logs"><button id="clear">x</button></div>
 </div>
 
 
